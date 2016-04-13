@@ -541,7 +541,7 @@ static void power_manage(void)
 int main(void)
 {
 	uint32_t err_code;
-	bool erase_bonds;
+	bool erase_bonds = false;
 
 	app_trace_init();
 	// Initialize.
@@ -552,9 +552,12 @@ int main(void)
 	advertising_init();
 	services_init();
 	conn_params_init();
+	
+	init_storage();
+	
 	wps_init(wps_channel_list, 1);
 	init_battery_measure();
-	init_storage();
+	
 
     // Start execution.
 	application_timers_start();

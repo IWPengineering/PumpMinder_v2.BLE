@@ -30,7 +30,8 @@ void init_storage(void)
 {
 	uint32_t err_code;
 	
-	pstorage_module_param_t param = {
+	pstorage_module_param_t param = 
+	{
 		.cb = pstorage_cb,
 		.block_size = PERM_STORAGE_BLOCK_SIZE,
 		.block_count = PERM_STORAGE_BLOCK_COUNT
@@ -40,6 +41,7 @@ void init_storage(void)
 	if (err_code != NRF_SUCCESS)
 	{
 		// Handle error
+		BREAK_OUT();
 	}
 }
 
@@ -48,7 +50,7 @@ uint8_t get_next_record(void)
 	return cur_record_ptr;
 }
 
-uint8_t dest_array[PERM_STORAGE_BLOCK_SIZE];
+static uint8_t dest_array[PERM_STORAGE_BLOCK_SIZE] __attribute__((aligned(4)));
 bool get_record(ble_display_service_record_t *p_record)
 {
 	uint32_t err_code;
@@ -61,12 +63,14 @@ bool get_record(ble_display_service_record_t *p_record)
 	if (err_code != NRF_SUCCESS)
 	{
 		// Handle error
+		BREAK_OUT();
 	}
 	
 	err_code = pstorage_load(dest_array, &cur_block_id, PERM_STORAGE_BLOCK_SIZE, 0);
 	if (err_code != NRF_SUCCESS)
 	{
 		// Handle error
+		BREAK_OUT();
 	}
 	
 	// The information should already be here - 
@@ -77,7 +81,7 @@ bool get_record(ble_display_service_record_t *p_record)
 	return true;
 }
 
-uint8_t pD[PERM_STORAGE_BLOCK_SIZE] __attribute__((aligned(4)));
+static uint8_t pD[PERM_STORAGE_BLOCK_SIZE] __attribute__((aligned(4)));
 bool save_record(ble_display_service_record_t *p_record)
 {
 	if (is_pstorage_busy)
@@ -95,6 +99,7 @@ bool save_record(ble_display_service_record_t *p_record)
 	if (err_code != NRF_SUCCESS)
 	{
 		// Handle error
+		BREAK_OUT();
 	}
 	
 	memcpy(pD, &p_record->timestamp, 4);
@@ -104,6 +109,7 @@ bool save_record(ble_display_service_record_t *p_record)
 	if (err_code != NRF_SUCCESS)
 	{
 		// Handle error
+		BREAK_OUT();
 	}
 	
 	is_pstorage_busy = true;

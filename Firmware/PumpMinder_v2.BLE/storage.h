@@ -5,9 +5,10 @@
 #include "ble_display_service.h"
 #include "pstorage.h"
 #include <string.h>
+#include "preprocessor.h"
 
 #define PERM_STORAGE_BLOCK_SIZE		8
-#define PERM_STORAGE_BLOCK_COUNT	255
+#define PERM_STORAGE_BLOCK_COUNT	256
 
 void init_storage(void);
 uint8_t get_next_record(void);
