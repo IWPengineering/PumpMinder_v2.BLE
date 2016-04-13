@@ -4,6 +4,40 @@ static pstorage_handle_t pstorage_block_base_id = { .module_id = 0x1 };
 static bool is_pstorage_busy = false;
 static uint8_t cur_record_ptr = 0;
 
+static uint8_t record_position_holder __attribute__((aligned(4)));
+static void increment_record_number(void)
+{
+	uint32_t err_code;
+	
+	pstorage_handle_t cur_block_id;
+	
+	err_code = pstorage_block_identifier_get(&pstorage_block_base_id, 
+		256,
+		&cur_block_id);
+	if (err_code != NRF_SUCCESS)
+	{
+		// Handle error
+		BREAK_OUT();
+	}
+	
+	record_position_holder = get_next_record();
+	if (record_position_holder == 0xFF)
+	{
+		record_position_holder = 0;
+	}
+	else
+	{
+		record_position_holder++;
+	}
+	
+	err_code = pstorage_update(&cur_block_id, &record_position_holder, 1, 0);
+	if (err_code != NRF_SUCCESS)
+	{
+		// Handle error
+		BREAK_OUT();
+	}
+}
+
 static void pstorage_cb(pstorage_handle_t *p_handle, 
 	uint8_t op_code,
 	uint32_t result,
@@ -47,7 +81,28 @@ void init_storage(void)
 
 uint8_t get_next_record(void)
 {
-	return cur_record_ptr;
+	uint32_t err_code;
+	
+	pstorage_handle_t cur_block_id;
+	
+	err_code = pstorage_block_identifier_get(&pstorage_block_base_id, 
+		256,
+		&cur_block_id);
+	if (err_code != NRF_SUCCESS)
+	{
+		// Handle error
+		BREAK_OUT();
+	}
+	
+	uint8_t rec_val __attribute__((aligned(4)));
+	err_code = pstorage_load(&rec_val, &cur_block_id, 1, 0);
+	if (err_code != NRF_SUCCESS)
+	{
+		// Handle error
+		BREAK_OUT();
+	}
+	if (rec_val == 0xFF) rec_val = 0;
+	return rec_val;
 }
 
 static uint8_t dest_array[PERM_STORAGE_BLOCK_SIZE] __attribute__((aligned(4)));
@@ -81,7 +136,7 @@ bool get_record(ble_display_service_record_t *p_record)
 	return true;
 }
 
-static uint8_t pD[PERM_STORAGE_BLOCK_SIZE] __attribute__((aligned(4)));
+static uint8_t save_array[PERM_STORAGE_BLOCK_SIZE] __attribute__((aligned(4)));
 bool save_record(ble_display_service_record_t *p_record)
 {
 	if (is_pstorage_busy)
@@ -102,10 +157,10 @@ bool save_record(ble_display_service_record_t *p_record)
 		BREAK_OUT();
 	}
 	
-	memcpy(pD, &p_record->timestamp, 4);
-	memcpy(pD + 4, &p_record->seconds_running, 4);
+	memcpy(save_array, &p_record->timestamp, 4);
+	memcpy(save_array + 4, &p_record->seconds_running, 4);
 	
-	err_code = pstorage_update(&cur_block_id, pD, PERM_STORAGE_BLOCK_SIZE, 0);
+	err_code = pstorage_update(&cur_block_id, save_array, PERM_STORAGE_BLOCK_SIZE, 0);
 	if (err_code != NRF_SUCCESS)
 	{
 		// Handle error
@@ -114,14 +169,7 @@ bool save_record(ble_display_service_record_t *p_record)
 	
 	is_pstorage_busy = true;
 	
-	if (cur_record_ptr == 0xFF)
-	{
-		cur_record_ptr = 0;
-	}
-	else
-	{
-		cur_record_ptr++;
-	}
+	increment_record_number();
 	
 	return true;
 }

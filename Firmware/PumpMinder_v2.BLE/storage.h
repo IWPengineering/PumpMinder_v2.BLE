@@ -8,7 +8,7 @@
 #include "preprocessor.h"
 
 #define PERM_STORAGE_BLOCK_SIZE		8
-#define PERM_STORAGE_BLOCK_COUNT	256
+#define PERM_STORAGE_BLOCK_COUNT	257
 
 void init_storage(void);
 uint8_t get_next_record(void);
