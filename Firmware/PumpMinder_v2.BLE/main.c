@@ -48,6 +48,7 @@
 #include "nrf_drv_saadc.h"
 #include "preprocessor.h"
 #include "storage.h"
+#include "nrf_drv_wdt.h"
 
 #define IS_SRVC_CHANGED_CHARACT_PRESENT  1                                          /**< Include or not the service_changed characteristic. if not enabled, the server's database cannot be changed for the lifetime of the device*/
 
@@ -115,6 +116,8 @@ ble_advdata_manuf_data_t 	manuf_data;
 const wps_channel_t wps_channel_list[] = {
 	{ .sense_channel = WPS_MEASURE_PIN, .control_channel = WPS_CONTROL_PIN }
 };
+
+static nrf_drv_wdt_channel_id m_wdt_channel_id;
                                    
 /**@brief Callback function for asserts in the SoftDevice.
  *
@@ -531,8 +534,14 @@ static void advertising_init(void)
  */
 static void power_manage(void)
 {
+	nrf_drv_wdt_channel_feed(m_wdt_channel_id);
 	uint32_t err_code = sd_app_evt_wait();
 	APP_ERROR_CHECK(err_code);
+}
+
+static void wdt_event_handler(void)
+{
+	nrf_drv_wdt_channel_feed(m_wdt_channel_id);
 }
 
 
@@ -553,12 +562,21 @@ int main(void)
 	services_init();
 	conn_params_init();
 	
+	err_code = nrf_drv_wdt_init(NULL, wdt_event_handler);
+	APP_ERROR_CHECK(err_code);
+	
+	err_code = nrf_drv_wdt_channel_alloc(&m_wdt_channel_id);
+	APP_ERROR_CHECK(err_code);
+	
+	nrf_drv_wdt_enable();
+	
 	init_storage();
 	
 	wps_init(wps_channel_list, 1);
 	init_battery_measure();
 	
-
+	sd_ble_gap_tx_power_set(-20);
+	
     // Start execution.
 	application_timers_start();
 	APPL_LOG("Start Advertising \r\n");
