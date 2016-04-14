@@ -47,7 +47,7 @@ bool is_water_present(const wps_channel_t *p_channel)
 	while (nrf_gpio_pin_read(p_channel->sense_channel) == pin_state)
 	{
 		timeout_val++;
-		if (timeout_val > 50)
+		if (timeout_val > TIMEOUT_TICKS)
 		{
 			break;
 		}
@@ -61,7 +61,7 @@ bool is_water_present(const wps_channel_t *p_channel)
 	while (nrf_gpio_pin_read(p_channel->sense_channel) != pin_state)
 	{
 		timeout_val++;
-		if (timeout_val > 50)
+		if (timeout_val > TIMEOUT_TICKS)
 		{
 			break;
 		}

@@ -7,6 +7,7 @@
 #include "nrf_drv_timer.h"
 
 #define PULSE_WIDTH_THRESHOLD		1000
+#define TIMEOUT_TICKS				50
 
 typedef struct 
 {
