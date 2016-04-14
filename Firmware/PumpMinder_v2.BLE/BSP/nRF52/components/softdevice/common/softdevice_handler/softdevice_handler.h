@@ -33,6 +33,7 @@
 #define SOFTDEVICE_HANDLER_H__
 
 #include <stdlib.h>
+#include <stdint.h>
 #include "nordic_common.h"
 #include "nrf_sdm.h"
 #include "app_error.h"
