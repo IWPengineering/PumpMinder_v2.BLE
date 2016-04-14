@@ -109,6 +109,6 @@ $RECYCLE.BIN/
 *.bin
 *.sdf
 *.opensdf
-*.xml
 *.log
 *.suo
+Firmware/PumpMinder_v2.BLE/VisualGDBCache/PumpMinder_v2.BLE-Debug/MemoryUtilizationReport.xml
