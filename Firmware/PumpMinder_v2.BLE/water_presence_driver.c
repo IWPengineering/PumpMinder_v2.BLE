@@ -54,7 +54,7 @@ bool is_water_present(const wps_channel_t *p_channel)
 	}
 	
 	// Once we see an edge, record the time
-	uint32_t prev_time = nrf_drv_timer_capture_get(&wps_timer, NRF_TIMER_CC_CHANNEL0);
+	uint32_t prev_time = nrf_drv_timer_capture(&wps_timer, NRF_TIMER_CC_CHANNEL0);
 	
 	// Wait for the other edge
 	timeout_val = 0;
@@ -68,7 +68,7 @@ bool is_water_present(const wps_channel_t *p_channel)
 	}
 	
 	// Record the new time
-	uint32_t cur_time = nrf_drv_timer_capture_get(&wps_timer, NRF_TIMER_CC_CHANNEL0);
+	uint32_t cur_time = nrf_drv_timer_capture(&wps_timer, NRF_TIMER_CC_CHANNEL0);
 	
 	// Turn off the timer, turn off the WPS
 	nrf_drv_timer_disable(&wps_timer);
