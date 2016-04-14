@@ -4,37 +4,15 @@ static pstorage_handle_t pstorage_block_base_id = { .module_id = 0x1 };
 static bool is_pstorage_busy = false;
 static uint8_t cur_record_ptr = 0;
 
-static uint8_t record_position_holder __attribute__((aligned(4)));
 static void increment_record_number(void)
 {
-	uint32_t err_code;
-	
-	pstorage_handle_t cur_block_id;
-	
-	err_code = pstorage_block_identifier_get(&pstorage_block_base_id, 
-		256,
-		&cur_block_id);
-	if (err_code != NRF_SUCCESS)
+	if (cur_record_ptr == 0xFF)
 	{
-		// Handle error
-		BREAK_OUT();
-	}
-	
-	record_position_holder = get_next_record();
-	if (record_position_holder == 0xFF)
-	{
-		record_position_holder = 0;
+		cur_record_ptr = 0;
 	}
 	else
 	{
-		record_position_holder++;
-	}
-	
-	err_code = pstorage_update(&cur_block_id, &record_position_holder, 1, 0);
-	if (err_code != NRF_SUCCESS)
-	{
-		// Handle error
-		BREAK_OUT();
+		cur_record_ptr++;
 	}
 }
 
@@ -81,28 +59,7 @@ void init_storage(void)
 
 uint8_t get_next_record(void)
 {
-	uint32_t err_code;
-	
-	pstorage_handle_t cur_block_id;
-	
-	err_code = pstorage_block_identifier_get(&pstorage_block_base_id, 
-		256,
-		&cur_block_id);
-	if (err_code != NRF_SUCCESS)
-	{
-		// Handle error
-		BREAK_OUT();
-	}
-	
-	uint8_t rec_val __attribute__((aligned(4)));
-	err_code = pstorage_load(&rec_val, &cur_block_id, 1, 0);
-	if (err_code != NRF_SUCCESS)
-	{
-		// Handle error
-		BREAK_OUT();
-	}
-	if (rec_val == 0xFF) rec_val = 0;
-	return rec_val;
+	return cur_record_ptr;
 }
 
 static uint8_t dest_array[PERM_STORAGE_BLOCK_SIZE] __attribute__((aligned(4)));
