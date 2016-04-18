@@ -82,6 +82,7 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
+#Add a description of these files.
 *.d
 *.crf
 *.lst
